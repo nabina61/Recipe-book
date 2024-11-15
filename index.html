@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Book</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<script>
+    function generateStars(rating) {
+        let stars = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= Math.floor(rating)) {
+                stars += '<i class="fa-solid fa-star"></i>';
+            } else if (i - rating <= 0.5) {
+                stars += '<i class="fa-solid fa-star-half"></i>';
+            } else {
+                stars += '<i class="fa-solid fa-star"></i>';
+            }
+        }
+        return stars;
+    }
+
+    fetch("db/recipes.json")
+        .then((response) => response.json())
+        .then((data) => {
+
+            // Search
+            const searchForm = document.getElementById('searchForm');
+            searchForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const searchQuery = document.getElementById('search-box').value;
+                const searchedData = data.find(k => k.name.toLowerCase().includes(searchQuery));
+                searchQuery.value = "";
+                if (searchedData) {
+                    window.location.href = `/recipe-detail.html?id=${searchedData.id}`;
+                } else {
+                    window.location.href = `/not-found.html`;
+                }
+            });
+
+            // Hero Section
+            const heroRecipe = data[0];
+            const heroRecipeContainer = document.getElementById("hero-recipes");
+            heroRecipeContainer.innerHTML = `
+               <div class="hero-image">
+                  <img src="${heroRecipe.imageUrl}" alt="${heroRecipe.name}">
+            </div>
+            <div class="hero-text">
+                <div class="hero-text-subtitle">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                    <span>85% would make this again</span>
+                </div>
+                <h2>${heroRecipe.name}</h2>
+                <p>${heroRecipe.description}</p>
+            </div>
+            `;
+
+            // Latest Recipes
+            const latestRecipes = data.sort(() => Math.random() - 0.5).slice(0, 4);
+            const latestRecipesContainer = document.getElementById("latest-recipes");
+            const latestRecipesCardsContainer = document.createElement("div");
+            latestRecipesCardsContainer.classList.add("cards");
+            latestRecipesCardsContainer.innerHTML = latestRecipes.map(recipe => {
+                return `
+                <a href="recipe-detail.html?id=${recipe.id}" class="card">
+                <div class="card-image">
+                    <img src="${recipe.imageUrl}" alt="${recipe.name}">
+                </div>
+                <div class="card-rating">
+                    ${generateStars(recipe.rating)}
+                </div>
+                <p class="card-title">${recipe.name}</p>
+                </a>
+            `;
+            }).join('');
+            latestRecipesContainer.appendChild(latestRecipesCardsContainer);
+
+            // For You
+            const superDeliciousRecipes = data.sort(() => Math.random() - 0.5).slice(0, 3);
+            const superDeliciousRecipesContainer = document.getElementById("super-delicious");
+            const superDeliciousRecipesCardsContainer = document.createElement("div");
+            superDeliciousRecipesCardsContainer.classList.add("cards");
+            superDeliciousRecipesCardsContainer.innerHTML = superDeliciousRecipes.map(recipe => {
+                return `<a href="recipe-detail.html?id=${recipe.id}" class="card">
+                    <div class="card-image">
+                        <img src="${recipe.imageUrl}" alt="${recipe.name}">
+                    </div>
+                    <div class="card-rating">
+                         ${generateStars(recipe.rating)}
+                    </div>
+                    <p class="card-title">${recipe.name}</p>
+                </a>`;
+            }).join('');
+            superDeliciousRecipesContainer.appendChild(superDeliciousRecipesCardsContainer);
+
+            // Sweet Tooth
+            const sweetToothRecipes = data.filter(k => k.meta.category.toLowerCase().includes("dessert")).sort(() => Math.random() - 0.5).slice(0, 3);
+            const sweetToothRecipesContainer = document.getElementById("sweet-tooth");
+            const sweetToothRecipesCardsContainer = document.createElement("div");
+            sweetToothRecipesCardsContainer.classList.add("cards");
+            sweetToothRecipesCardsContainer.innerHTML = sweetToothRecipes.map(recipe => {
+                return `<a href="recipe-detail.html?id=${recipe.id}" class="card">
+                    <div class="card-image">
+                        <img src="${recipe.imageUrl}" alt="${recipe.name}">
+                    </div>
+                    <div class="card-rating">
+                         ${generateStars(recipe.rating)}
+                    </div>
+                    <p class="card-title">${recipe.name}</p>
+                </a>`;
+            }).join('');
+            sweetToothRecipesContainer.appendChild(sweetToothRecipesCardsContainer);
+
+            // Popular Categories
+            const popularCategoriesRecipes = data.sort(() => Math.random() - 0.5).slice(0, 6);
+            const popularCategoriesRecipesContainer = document.getElementById("popular-categories");
+            const popularCategoriesRecipesCardsContainer = document.createElement("div");
+            popularCategoriesRecipesCardsContainer.classList.add("cards");
+            popularCategoriesRecipesCardsContainer.innerHTML = popularCategoriesRecipes.map(recipe => {
+                return ` <a class="card" href="recipe-detail.html?id=${recipe.id}">
+                    <div class="card-image">
+                       <img src="${recipe.imageUrl}" alt="${recipe.name}">
+                    </div>
+                    <p class="card-title">${recipe.name}</p>
+                </a>`;
+            }).join('');
+            popularCategoriesRecipesContainer.appendChild(popularCategoriesRecipesCardsContainer);
+
+            // All Recipes
+            const allRecipes = data;
+            const allRecipesContainer = document.getElementById("all-recipes");
+            const allRecipesCardsContainer = document.createElement("div");
+            allRecipesCardsContainer.classList.add("cards");
+            allRecipesCardsContainer.innerHTML = allRecipes.map(recipe => {
+                return `  <a href="recipe-detail.html?id=${recipe.id}" class="card">
+                    <div class="card-image">
+                        <img src="${recipe.imageUrl}" alt="${recipe.name}">
+                    </div>
+                  <p class="card-title">${recipe.name}</p>
+                </a>`;
+            }).join('');
+            allRecipesContainer.appendChild(allRecipesCardsContainer);
+        });
+</script>
+
+<body>
+
+    <div class="container">
+        <!-- Navbar Start -->
+        <nav class="nav-bar">
+            <div class="brand-image">
+                <a href="index.html"><img src="images/logo.png" alt="Recipe Book"></a>
+            </div>
+            <form class="search-container" id="searchForm">
+                <input type="text" id="search-box" placeholder="Search...">
+                <button id="search-button" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+            <ul class="nav-links">
+                <li class="active">
+                    <a href="index.html">Home</a>
+                </li>
+                <li>
+                    <a href="login.html">Login</a>
+                </li>
+                <li>
+                    <a href="signup.html">Sign Up</a>
+                </li>
+            </ul>
+        </nav>
+        <!-- Navbar End -->
+
+        <!-- Hero Section Start -->
+        <section class="hero" id="hero-recipes">
+        </section>
+        <!-- Hero Section End -->
+
+        <!-- Latest Recipes Start -->
+        <section class="latest-recipes" id="latest-recipes">
+            <h2>Latest Recipes</h2>
+        </section>
+        <!-- Latest Recipes End -->
+
+        <!-- Varieties Start -->
+        <section class="varieties" id="super-delicious">
+            <h2>For You</h2>
+        </section>
+        <!-- Varieties End -->
+
+        <!-- Varieties Start -->
+        <section class="varieties" id="sweet-tooth">
+            <h2>Sweet Tooth</h2>
+        </section>
+        <!-- Varieties End -->
+
+        <!-- Popular Categories Start -->
+        <section class="popular-categories" id="popular-categories">
+            <h2>Popular Recipes</h2>
+        </section>
+        <!-- Popular Categories End -->
+    </div>
+
+    <!-- Newsletter Start -->
+    <section class="newsletter">
+        <h3>Deliciousness to Your Inbox</h3>
+        <p>Enjoy weekly hand picked recipes and recommendations</p>
+        <form class="input-box" id="newsLetterForm">
+            <input id="newsletterEmail" type="email" placeholder="Email Address" name="newsletter-email" required>
+            <button type="submit">Join</button>
+        </form>
+        <div class="agreement">By joining our newsletter you agree to our <a href="#">Terms and Conditions</a></div>
+    </section>
+    <!-- Newsletter End -->
+
+    <div class="container">
+        <!-- Latest Recipes Start -->
+        <section class="latest-recipes" id="all-recipes">
+            <h2>All Recipes</h2>
+        </section>
+        <!-- Latest Recipes End -->
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-about">
+                    <h4>About Us</h4>
+                    <p>We provide the best recipes and cooking tips to help you create delicious meals at home.</p>
+                </div>
+
+                <div class="footer-contact">
+                    <h4>Contact Us</h4>
+                    <p>Email: info@recipebook.com</p>
+                    <p>Phone: +977 9846259864</p>
+                    <p>Address: Kathmandu, Nepal</p>
+                </div>
+
+                <div class="footer-social">
+                    <h4>Follow Us</h4>
+                    <div class="social-icons">
+                        <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Recipe Book. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const form = document.getElementById('newsLetterForm');
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const newsletterEmail = document.getElementById('newsletterEmail').value;
+            alert('Thank you for joining our newsletter. You will receive a recipe in your email every week. Happy Cooking!!');
+        });
+    </script>
+
+</body>
+
+</html>

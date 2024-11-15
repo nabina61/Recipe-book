@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <title>Recipe Book</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<script>
+    function getQueryParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            id: parseInt(params.get('id'))
+        };
+    }
+
+    function generateStars(rating) {
+        let stars = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= Math.floor(rating)) {
+                stars += '<i class="fa-solid fa-star"></i>';
+            } else if (i - rating <= 0.5) {
+                stars += '<i class="fa-solid fa-star-half"></i>';
+            } else {
+                stars += '<i class="fa-solid fa-star"></i>';
+            }
+        }
+        return stars;
+    }
+
+    fetch('db/recipes.json')
+        .then(response => response.json())
+        .then(data => {
+            const queryParams = getQueryParams();
+            const recipe = data.find(r => r.id === queryParams.id);
+            if (recipe) {
+                const detailDiv = document.getElementById('recipe-detail');
+                detailDiv.innerHTML = `
+                        <h1>${recipe.name}</h1>
+                        <img src="${recipe.imageUrl}" alt="${recipe.name}">
+                         <div class="card-rating">
+                            ${generateStars(recipe.rating)}
+                        </div>
+                        <p class="desc">Total Cooking Time: ${recipe.total_cooking_time} | Servings: ${recipe.meta.servings}</p>
+                        <p class="desc">Category: ${recipe.meta.category} | Cuisine: ${recipe.meta.cuisine}</p>
+                        <p class="desc">${recipe.date_published}</p>
+                        <h2>Description</h2>
+                        <p class="desc">${recipe.description}</p>
+                        <h2>Ingredients</h2>
+                        <ul>${recipe.ingredients.map(i => `<li class="desc">${i}</li>`).join('')}</ul>
+                        <h2>Instructions</h2>
+                        <ul>${recipe.steps.map(i => `<li class="desc">${i}</li>`).join('')}</ul>
+                        <button class="share-button" id="share-button" type="button">Share</button>
+                         <h2>Comments (${recipe.comments.length})</h2>
+                        <ul class="comments">${recipe.comments.map(i => `<li class="comment">${i}</li>`).join('')}</ul>
+                        <h3>Please leave your review below</h3>
+                        <form id="comment-form">
+                            <div class="rating-container">
+                                <label for="rating">Rating:</label>
+                                <div class="rating-options">
+                                    <label><input type="radio" name="rating" value="1"> 1</label>
+                                    <label><input type="radio" name="rating" value="2"> 2</label>
+                                    <label><input type="radio" name="rating" value="3"> 3</label>
+                                    <label><input type="radio" name="rating" value="4"> 4</label>
+                                    <label><input type="radio" checked name="rating" value="5"> 5</label>
+                                    </div>
+                                <textarea id="comment-box" placeholder="Add your comment..." rows="4" required></textarea>
+                            </div>
+                            <button id="comment-submit-button" type="submit">Submit</button>
+                        </form>
+                    `;
+            } else {
+                document.getElementById('recipe-detail').innerHTML = 'Recipe not found';
+            }
+
+            const button = document.getElementById('share-button');
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                navigator.clipboard.writeText(window.location.href)
+                    .then(() => {
+                        alert('The recipe link has been copied to your clipboard. You can paste the link to share the recipe link.');
+                    })
+                    .catch(err => {
+                        alert('Failed to copy text! Please try again.');
+                    });
+
+            });
+
+            const commentForm = document.getElementById('comment-form');
+            commentForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                alert('Thank you for your comment!');
+                window.location.reload();
+            });
+
+        });
+</script>
+</script>
+
+<body>
+    <div class="container">
+        <!-- Navbar Start -->
+        <nav class="nav-bar">
+            <div class="brand-image">
+                <a href="index.html"><img src="images/logo.png" alt="Recipe Book"></a>
+            </div>
+            <ul class="nav-links">
+                <li>
+                    <a href="index.html">Home</a>
+                </li>
+                <li>
+                    <a href="login.html">Login</a>
+                </li>
+                <li>
+                    <a href="signup.html">Sign Up</a>
+                </li>
+            </ul>
+        </nav>
+        <!-- Navbar End -->
+        <div id="recipe-detail"></div>
+    </div>
+    <footer>
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-about">
+                    <h4>About Us</h4>
+                    <p>We provide the best recipes and cooking tips to help you create delicious meals at home.</p>
+                </div>
+
+                <div class="footer-contact">
+                    <h4>Contact Us</h4>
+                    <p>Email: info@recipebook.com</p>
+                    <p>Phone: +977 9846259864</p>
+                    <p>Address: Kathmandu, Nepal</p>
+                </div>
+
+                <div class="footer-social">
+                    <h4>Follow Us</h4>
+                    <div class="social-icons">
+                        <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Recipe Book. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
